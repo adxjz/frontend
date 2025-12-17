@@ -17,6 +17,46 @@
     </div>
   </div>
 
-  
+  <script>
+    (function(){
+      const container = document.getElementById('orderSummary');
+      if(!container) return;
+      const raw = localStorage.getItem('lastOrder');
+      if(!raw){
+        container.innerHTML = '<div style="padding:12px;color:#666">No recent order found.</div>';
+        return;
+      }
+      try{
+        const order = JSON.parse(raw);
+        const items = order.items || [];
+        if(items.length === 0){
+          container.innerHTML = '<div style="padding:12px;color:#666">No items in the last order.</div>';
+          return;
+        }
+
+        const itemsHtml = items.map(i => {
+          const subtotal = Number(i.price) * Number(i.qty);
+          return `<div class="order-row" style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee"><div><strong>${i.title}</strong> &times; ${i.qty}</div><div>₹ ${Number(subtotal).toLocaleString('en-IN')}</div></div>`;
+        }).join('');
+
+        const totalHtml = `<div style="margin-top:12px;font-weight:700;font-size:16px;">Total: ₹ ${Number(order.total).toLocaleString('en-IN')}</div>`;
+
+        const s = order.shipping || {};
+        const addr = `${s.address || ''}${s.city ? ', ' + s.city : ''}${s.pincode ? ' - ' + s.pincode : ''}`;
+        const shippingHtml = `
+          <div style="margin-top:14px">
+            <h4 style="margin:6px 0 8px 0">Shipping Details</h4>
+            <div>${s.name || ''}</div>
+            <div>${s.email || ''}${s.phone ? ' • ' + s.phone : ''}</div>
+            <div style="color:#555">${addr}</div>
+          </div>`;
+
+        container.innerHTML = itemsHtml + totalHtml + shippingHtml;
+      }catch(e){
+        console.error('Failed to render order', e);
+        container.innerHTML = '<div style="padding:12px;color:#c00">Could not load order summary.</div>';
+      }
+    })();
+  </script>
 </body>
 </html>

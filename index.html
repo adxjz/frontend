@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>JZ Shop</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<!-- ===== LOGIN PAGE (UI only) ===== -->
+<!-- The login screen appears first and gates access to the Home UI. -->
+<body>  AS
+  <div id="loginScreen" class="login-screen" aria-hidden="false">
+    <div class="login-card">
+      <header class="login-header">
+        <div class="brand">JZ Shop</div>
+        <div class="login-sub">Sign in to continue</div>
+      </header>
+
+      <form id="loginForm" class="login-form" novalidate>
+        <label class="field">
+          <span class="label">Email or username</span>
+          <input id="loginEmail" name="email" type="text" required placeholder="you@example.com" />
+        </label>
+        <label class="field">
+          <span class="label">Password</span>
+          <input id="loginPassword" name="password" type="password" required placeholder="••••••••" />
+        </label>
+        <div class="actions">
+          <button type="submit" class="btn primary">Login</button>
+        </div>
+      </form>
+
+      <footer class="login-foot">By continuing you agree to our friendly demo terms.</footer>
+    </div>
+  </div>
+
+  <!-- ===== HOME PAGE (hidden until login) ===== -->
+  <main id="app" class="app center-wrap" aria-hidden="true">
+    <header class="site-header">
+      <div class="brand">JZ Shop</div>
+      <nav class="nav">
+        <a href="#">Home</a>
+        <a href="#">Products</a>
+        <a href="#">Contact</a>
+      </nav>
+
+      <div class="header-actions">
+        <button id="notifBtn" class="icon-btn" title="Notifications">🔔 <span id="notifCount" class="badge" style="display:none">0</span></button>
+        <button id="cartOpenBtn" class="icon-btn" title="Cart">🛒 <span id="cartCount" class="badge" style="display:none">0</span></button>
+      </div>
+    </header>
+
+    <!-- Checkout modal (keeps existing IDs so JS works unchanged) -->
+    <div id="checkoutModal" class="modal" aria-hidden="true">
+      <div class="modal-content">
+        <button id="closeCheckout" class="modal-close">&times;</button>
+        <h3>Shipping Details</h3>
+
+        <form id="checkoutForm">
+          <label>
+            Full name
+            <input name="name" required />
+          </label>
+
+          <label>
+            Email
+            <input name="email" type="email" required />
+          </label>
+
+          <label>
+            Phone
+            <input name="phone" type="tel" required />
+          </label>
+
+          <label>
+            Address
+            <input name="address" required />
+          </label>
+
+          <label>
+            City
+            <input name="city" required />
+          </label>
+
+          <label>
+            Pincode
+            <input name="pincode" required />
+          </label>
+
+          <div class="modal-actions">
+            <button type="submit" class="btn add-cart">Confirm & Pay</button>
+            <button type="button" id="cancelCheckout" class="btn buy-now">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" style="display:none"></div>
+
+    <!-- Product grid -->
+    <section class="product-section">
+      <div class="grid-head">
+        <h1 class="title">Featured Products</h1>
+        <p class="subtitle">Hand-picked items for you</p>
+      </div>
+
+      <div class="product-list" id="productList">
+        <!-- Items are static in HTML but kept simple for demo; JS still uses DATA constants -->
+        <div class="product">
+          <img src="image/shoe.jpeg" alt="Shoe">
+          <div class="p-body">
+            <h3>Shoe</h3>
+            <div class="price">₹ 50</div>
+            <div class="actions">
+              <button class="btn add-cart" data-id="1">Add to Cart</button>
+              <button class="btn buy-now" data-id="1">Buy Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="product">
+          <img src="image/laptop.webp" alt="Laptop">
+          <div class="p-body">
+            <h3>Laptop</h3>
+            <div class="price">₹ 50,000</div>
+            <div class="actions">
+              <button class="btn add-cart" data-id="4">Add to Cart</button>
+              <button class="btn buy-now" data-id="4">Buy Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="product">
+          <img src="image/shirt.jpg" alt="Shirt">
+          <div class="p-body">
+            <h3>Shirt</h3>
+            <div class="price">₹ 399</div>
+            <div class="actions">
+              <button class="btn add-cart" data-id="2">Add to Cart</button>
+              <button class="btn buy-now" data-id="2">Buy Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="product">
+          <img src="image/speaker.jpg" alt="Speaker">
+          <div class="p-body">
+            <h3>Speaker</h3>
+            <div class="price">₹ 999</div>
+            <div class="actions">
+              <button class="btn add-cart" data-id="3">Add to Cart</button>
+              <button class="btn buy-now" data-id="3">Buy Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cart Panel (keeps same IDs to preserve behavior) -->
+    <aside id="cartPanel" class="cart-panel" aria-hidden="true">
+      <div class="cart-panel-inner">
+        <button id="closeCartPanel" class="close-panel">&times;</button>
+        <h3>Your Cart</h3>
+        <div id="cartItemsList" class="cart-items"></div>
+
+        <div class="cart-summary">
+          <div class="subtotal">Subtotal: <strong>₹ <span id="cartSubtotal">0</span></strong></div>
+          <div class="checkout-row">
+            <button id="checkoutFromCart" class="btn buy-now">Proceed to Checkout</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <footer class="site-footer">
+      <div>© JZ Shop — Aditya</div>
+    </footer>
+  </main>
+
+  <!-- Inline login behavior (UI only): show home after successful form submit -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){
+      const loginScreen = document.getElementById('loginScreen');
+      const app = document.getElementById('app');
+      const loginForm = document.getElementById('loginForm');
+
+      const isLogged = sessionStorage.getItem('isLoggedIn') === '1';
+      if(isLogged){ loginScreen.style.display = 'none'; app.style.display = ''; app.setAttribute('aria-hidden','false'); }
+      else { loginScreen.style.display = ''; app.style.display = 'none'; app.setAttribute('aria-hidden','true'); }
+
+      loginForm.addEventListener('submit', function(ev){
+        ev.preventDefault();
+        sessionStorage.setItem('isLoggedIn','1');
+        loginScreen.style.display = 'none';
+        app.style.display = '';
+        app.setAttribute('aria-hidden','false');
+        // focus first actionable element
+        const firstBtn = document.querySelector('.product .btn'); if(firstBtn) firstBtn.focus();
+      });
+    });
+  </script>
+
+  <!-- Main application script (keeps behavior unchanged) -->
+  <script src="script.js"></script>
+</body>
+</html>

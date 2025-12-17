@@ -34,24 +34,46 @@
           return;
         }
 
-        const itemsHtml = items.map(i => {
+        // order timestamp (compact localized)
+        const ts = order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN') : '';
+
+        let html = '';
+        if(ts) html += `<div style="margin-bottom:8px;color:#666;font-size:13px">Ordered on ${ts}</div>`;
+
+        html += '<div style="border-top:1px solid #eee;padding-top:8px">';
+        html += '<div style="margin-bottom:8px;font-weight:700">Items</div>';
+
+        html += items.map(i => {
           const subtotal = Number(i.price) * Number(i.qty);
-          return `<div class="order-row" style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee"><div><strong>${i.title}</strong> &times; ${i.qty}</div><div>₹ ${Number(subtotal).toLocaleString('en-IN')}</div></div>`;
+          return `
+            <div class="order-row" style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f4f4f4">
+              <div>
+                <div style="font-weight:700">${i.title}</div>
+                <div style="color:#666;font-size:13px">₹ ${Number(i.price).toLocaleString('en-IN')} each • Qty: ${i.qty}</div>
+              </div>
+              <div style="font-weight:700">₹ ${Number(subtotal).toLocaleString('en-IN')}</div>
+            </div>`;
         }).join('');
 
-        const totalHtml = `<div style="margin-top:12px;font-weight:700;font-size:16px;">Total: ₹ ${Number(order.total).toLocaleString('en-IN')}</div>`;
+        html += '</div>';
+
+        html += `<div style="margin-top:12px;font-weight:700;font-size:16px">Total: ₹ ${Number(order.total).toLocaleString('en-IN')}</div>`;
 
         const s = order.shipping || {};
-        const addr = `${s.address || ''}${s.city ? ', ' + s.city : ''}${s.pincode ? ' - ' + s.pincode : ''}`;
-        const shippingHtml = `
+        const addrParts = [];
+        if(s.address) addrParts.push(s.address);
+        if(s.city) addrParts.push(s.city);
+        const addr = addrParts.join(', ') + (s.pincode ? ' - ' + s.pincode : '');
+
+        html += `
           <div style="margin-top:14px">
             <h4 style="margin:6px 0 8px 0">Shipping Details</h4>
-            <div>${s.name || ''}</div>
-            <div>${s.email || ''}${s.phone ? ' • ' + s.phone : ''}</div>
+            <div style="font-weight:700">${s.name || ''}</div>
+            <div style="color:#666">${s.email || ''}${s.phone ? ' • ' + s.phone : ''}</div>
             <div style="color:#555">${addr}</div>
           </div>`;
 
-        container.innerHTML = itemsHtml + totalHtml + shippingHtml;
+        container.innerHTML = html;
       }catch(e){
         console.error('Failed to render order', e);
         container.innerHTML = '<div style="padding:12px;color:#c00">Could not load order summary.</div>';

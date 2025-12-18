@@ -1,5 +1,5 @@
 /* ==========================
-   style.css — Redesigned UI
+   App.css — Converted from style.css
    Keep CSK yellow theme: body background remains #f9d616
    Sections: Login Page + Home Page styles
    ========================== */
@@ -38,6 +38,7 @@ body{
 
 .btn{ padding:10px 14px; cursor:pointer; border:none; border-radius:10px; font-weight:700; color:#fff; display:inline-flex; align-items:center; gap:8px }
 .btn.primary{ background: linear-gradient(180deg,#0b1320,#0b1320); }
+.btn:disabled{ opacity:0.5; cursor:not-allowed; }
 
 /* ===== HOME PAGE ===== */
 .site-header{ display:flex;align-items:center;justify-content:space-between;padding:18px 0;margin-bottom:18px }

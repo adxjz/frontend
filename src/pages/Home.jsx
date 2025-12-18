@@ -12,13 +12,11 @@ function Home() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [notifCount, setNotifCount] = useState(0);
   const [toast, setToast] = useState({ show: false, message: '' });
-  const [checkoutModal, setCheckoutModal] = useState({ show: false, items: [] });
-  const [shippingForm, setShippingForm] = useState({
-    name: '', email: '', phone: '', address: '', city: '', pincode: ''
-  });
 
-  // Load cart and login state on mount
   useEffect(() => {
+    const loggedIn = sessionStorage.getItem('isLoggedIn') === '1';
+    setIsLoggedIn(loggedIn);
+    
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
       try {
@@ -27,19 +25,15 @@ function Home() {
         setCart({});
       }
     }
-    
-    const loggedIn = sessionStorage.getItem('isLoggedIn') === '1';
-    setIsLoggedIn(loggedIn);
   }, []);
 
-  // Save cart to localStorage whenever cart changes
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  const showToast = (message, duration = 1400) => {
+  const showToast = (message) => {
     setToast({ show: true, message });
-    setTimeout(() => setToast({ show: false, message: '' }), duration);
+    setTimeout(() => setToast({ show: false, message: '' }), 1400);
   };
 
   const handleLogin = (e) => {
@@ -48,19 +42,16 @@ function Home() {
     setIsLoggedIn(true);
   };
 
-  const addToCart = (productId, quantity = 1) => {
+  const addToCart = (productId) => {
     const product = PRODUCTS.find(p => p.id === productId);
-    if (!product) {
-      showToast('Product not found');
-      return;
-    }
+    if (!product) return;
 
     setCart(prevCart => {
       const newCart = { ...prevCart };
       if (newCart[productId]) {
-        newCart[productId].qty += quantity;
+        newCart[productId].qty += 1;
       } else {
-        newCart[productId] = { item: product, qty: quantity };
+        newCart[productId] = { item: product, qty: 1 };
       }
       return newCart;
     });
@@ -90,17 +81,7 @@ function Home() {
     });
   };
 
-  const handleBuyNow = (productId) => {
-    const product = PRODUCTS.find(p => p.id === productId);
-    if (product) {
-      setCheckoutModal({
-        show: true,
-        items: [{ id: productId, title: product.title, price: product.price, qty: 1 }]
-      });
-    }
-  };
-
-  const handleCartCheckout = () => {
+  const handleCheckout = () => {
     const items = Object.values(cart);
     if (items.length === 0) {
       showToast('Cart is empty');
@@ -114,29 +95,16 @@ function Home() {
       qty: c.qty
     }));
     
-    setCheckoutModal({ show: true, items: checkoutItems });
-  };
-
-  const handleCheckoutSubmit = (e) => {
-    e.preventDefault();
-    const total = checkoutModal.items.reduce((sum, item) => sum + item.price * item.qty, 0);
+    const total = checkoutItems.reduce((sum, item) => sum + item.price * item.qty, 0);
     
-    const order = {
-      items: checkoutModal.items,
-      total,
-      shipping: shippingForm,
-      createdAt: new Date().toISOString()
-    };
-
-    localStorage.setItem('lastOrder', JSON.stringify(order));
-    
-    // Clear cart and form
+    navigate('/checkout', { 
+      state: { 
+        cartItems: checkoutItems, 
+        total: total 
+      } 
+    });
     setCart({});
-    setShippingForm({ name: '', email: '', phone: '', address: '', city: '', pincode: '' });
-    setCheckoutModal({ show: false, items: [] });
     setIsCartOpen(false);
-    
-    navigate('/order');
   };
 
   const cartItemCount = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
@@ -212,97 +180,13 @@ function Home() {
         </div>
       </header>
 
-      {/* Checkout Modal */}
-      {checkoutModal.show && (
-        <div className="modal open">
-          <div className="modal-content">
-            <button 
-              className="modal-close"
-              onClick={() => setCheckoutModal({ show: false, items: [] })}
-            >
-              &times;
-            </button>
-            <h3>Shipping Details</h3>
-            <form onSubmit={handleCheckoutSubmit}>
-              <label>
-                Full name
-                <input
-                  name="name"
-                  required
-                  value={shippingForm.name}
-                  onChange={(e) => setShippingForm(prev => ({ ...prev, name: e.target.value }))}
-                />
-              </label>
-              <label>
-                Email
-                <input
-                  name="email"
-                  type="email"
-                  required
-                  value={shippingForm.email}
-                  onChange={(e) => setShippingForm(prev => ({ ...prev, email: e.target.value }))}
-                />
-              </label>
-              <label>
-                Phone
-                <input
-                  name="phone"
-                  type="tel"
-                  required
-                  value={shippingForm.phone}
-                  onChange={(e) => setShippingForm(prev => ({ ...prev, phone: e.target.value }))}
-                />
-              </label>
-              <label>
-                Address
-                <input
-                  name="address"
-                  required
-                  value={shippingForm.address}
-                  onChange={(e) => setShippingForm(prev => ({ ...prev, address: e.target.value }))}
-                />
-              </label>
-              <label>
-                City
-                <input
-                  name="city"
-                  required
-                  value={shippingForm.city}
-                  onChange={(e) => setShippingForm(prev => ({ ...prev, city: e.target.value }))}
-                />
-              </label>
-              <label>
-                Pincode
-                <input
-                  name="pincode"
-                  required
-                  value={shippingForm.pincode}
-                  onChange={(e) => setShippingForm(prev => ({ ...prev, pincode: e.target.value }))}
-                />
-              </label>
-              <div className="modal-actions">
-                <button type="submit" className="btn add-cart">Confirm & Pay</button>
-                <button 
-                  type="button" 
-                  className="btn buy-now"
-                  onClick={() => setCheckoutModal({ show: false, items: [] })}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Toast */}
       {toast.show && (
         <div className="toast" role="status" aria-live="polite">
           {toast.message}
         </div>
       )}
 
-      <ProductList onAddToCart={addToCart} onBuyNow={handleBuyNow} />
+      <ProductList onAddToCart={addToCart} onBuyNow={addToCart} />
 
       <CartPanel
         isOpen={isCartOpen}
@@ -310,7 +194,7 @@ function Home() {
         cart={cart}
         onUpdateQuantity={updateQuantity}
         onRemoveItem={removeFromCart}
-        onCheckout={handleCartCheckout}
+        onCheckout={handleCheckout}
       />
 
       <footer className="site-footer">
